@@ -1,13 +1,21 @@
 <x-app-layout>
     <x-slot name="header">
+        @php
+            if(!$conversation->is_group) {
+                $otherUser = $conversation->users->where('id', '!=', auth()->id())->first();
+                $headerName = $otherUser ? $otherUser->name : 'Private Chat';
+            } else {
+                $headerName = $conversation->name ?? 'Group Chat';
+            }
+        @endphp
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Chat: ') }} {{ $conversation->name ?? 'Group Chat' }}
+            {{ __('Chat: ') }} {{ $headerName }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex h-[600px]">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex h-[calc(100vh-12rem)] min-h-[400px]">
                 <!-- Sidebar -->
                 <div class="w-1/3 border-r flex flex-col">
                     <div class="p-4 border-b font-bold text-lg flex justify-between items-center relative">
@@ -61,8 +69,16 @@
                     </div>
                     <div class="flex-1 overflow-y-auto">
                         @foreach($conversations as $conv)
-                            <a href="{{ route('chat.show', $conv) }}" class="block p-4 border-b hover:bg-gray-50 {{ $conv->id === $conversation->id ? 'bg-blue-50' : '' }}">
-                                <div class="font-semibold">{{ $conv->name ?? 'Group Chat' }}</div>
+                            @php
+                                if(!$conv->is_group) {
+                                    $otherUser = $conv->users->where('id', '!=', auth()->id())->first();
+                                    $chatName = $otherUser ? $otherUser->name : 'Private Chat';
+                                } else {
+                                    $chatName = $conv->name ?? 'Group Chat';
+                                }
+                            @endphp
+                            <a href="{{ route('chat.show', $conv) }}" class="block p-4 border-b hover:bg-gray-50 {{ isset($conversation) && $conv->id === $conversation->id ? 'bg-blue-50' : '' }}">
+                                <div class="font-semibold">{{ $chatName }}</div>
                                 <div class="text-sm text-gray-500 truncate">
                                     {{ $conv->messages->first()->body ?? 'No messages yet' }}
                                 </div>
@@ -74,7 +90,15 @@
                 <!-- Main Chat Area -->
                 <div class="w-2/3 flex flex-col bg-gray-50" x-data="chatComponent({{ $conversation->id }}, {{ auth()->id() }})">
                     <div class="p-4 border-b bg-white font-bold flex justify-between items-center">
-                        <span>{{ $conversation->name ?? 'Group Chat' }}</span>
+                        @php
+                            if(!$conversation->is_group) {
+                                $otherUser = $conversation->users->where('id', '!=', auth()->id())->first();
+                                $activeChatName = $otherUser ? $otherUser->name : 'Private Chat';
+                            } else {
+                                $activeChatName = $conversation->name ?? 'Group Chat';
+                            }
+                        @endphp
+                        <span>{{ $activeChatName }}</span>
                         <!-- Presence indicator -->
                         <span class="text-xs text-gray-500">
                             <span x-show="isOnline" class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1"></span>

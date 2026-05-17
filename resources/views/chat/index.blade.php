@@ -5,9 +5,9 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex h-[600px]">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex h-[calc(100vh-12rem)] min-h-[400px]">
                 <!-- Sidebar -->
                 <div class="w-1/3 border-r flex flex-col">
                     <div class="p-4 border-b font-bold text-lg flex justify-between items-center relative">
@@ -61,8 +61,16 @@
                     </div>
                     <div class="flex-1 overflow-y-auto">
                         @forelse($conversations as $conv)
+                            @php
+                                if(!$conv->is_group) {
+                                    $otherUser = $conv->users->where('id', '!=', auth()->id())->first();
+                                    $chatName = $otherUser ? $otherUser->name : 'Private Chat';
+                                } else {
+                                    $chatName = $conv->name ?? 'Group Chat';
+                                }
+                            @endphp
                             <a href="{{ route('chat.show', $conv) }}" class="block p-4 border-b hover:bg-gray-50">
-                                <div class="font-semibold">{{ $conv->name ?? 'Group Chat' }}</div>
+                                <div class="font-semibold">{{ $chatName }}</div>
                                 <div class="text-sm text-gray-500 truncate">
                                     {{ $conv->messages->first()->body ?? 'No messages yet' }}
                                 </div>
