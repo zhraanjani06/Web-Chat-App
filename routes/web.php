@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/private', [ChatController::class, 'storePrivate'])->name('chat.storePrivate');
+    Route::post('/chat/group', [ChatController::class, 'storeGroup'])->name('chat.storeGroup');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/messages', [ChatController::class, 'store'])->name('chat.store');
 });

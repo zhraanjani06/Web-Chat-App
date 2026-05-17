@@ -69,6 +69,29 @@ class ChatController extends Controller
         return redirect()->route('chat.show', $conversation);
     }
 
+    public function storeGroup(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id'
+        ]);
+
+        // Buat conversation baru dengan tipe grup
+        $conversation = Conversation::create([
+            'name' => $request->name,
+            'is_group' => true,
+        ]);
+
+        // Tambahkan user yang sedang login beserta user lain yang dipilih
+        $userIds = $request->user_ids;
+        $userIds[] = Auth::id(); // Tambahkan ID sendiri ke dalam grup
+
+        $conversation->users()->attach($userIds);
+
+        return redirect()->route('chat.show', $conversation);
+    }
+
     public function store(Request $request, Conversation $conversation)
     {
         if (!$conversation->users->contains(Auth::id())) {
